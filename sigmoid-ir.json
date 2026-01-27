@@ -1,0 +1,150 @@
+{
+    "resourceSpecId": "77777777-7777-4777-8777-777777777777",
+    "stableId": "main-cloudfront",
+    "displayName": "Main CloudFront Distribution",
+    "resourceType": "cdn.cloudfront",
+    "vpcDependency": "none",
+    "status": "draft",
+    "inputs": {
+        "aliases": ["cdn.sigmoid.dev", "assets.sigmoid.dev"],
+        "comment": "Sigmoid main CDN distribution",
+        "default_root_object": "index.html",
+        "enabled": true,
+        "http_version": "http2and3",
+        "is_ipv6_enabled": true,
+        "price_class": "PriceClass_200",
+        "retain_on_delete": false,
+        "wait_for_deployment": true,
+        "web_acl_id": { "ref": "cloudfront-waf.arn" },
+        "origins": [
+            {
+                "domain_name": { "ref": "s3-static.bucket_regional_domain_name" },
+                "origin_id": "s3-static",
+                "origin_access_control_id": { "ref": "oac.id" },
+                "origin_path": "",
+                "custom_headers": []
+            },
+            {
+                "domain_name": { "ref": "api-alb.dns_name" },
+                "origin_id": "api-backend",
+                "custom_origin_config": {
+                    "http_port": 80,
+                    "https_port": 443,
+                    "origin_protocol_policy": "https-only",
+                    "origin_ssl_protocols": ["TLSv1.2"],
+                    "origin_keepalive_timeout": 60,
+                    "origin_read_timeout": 60
+                }
+            }
+        ],
+        "origin_groups": [
+            {
+                "origin_id": "failover-group",
+                "failover_criteria": {
+                    "status_codes": [500, 502, 503, 504]
+                },
+                "member": [
+                    { "origin_id": "s3-static" },
+                    { "origin_id": "s3-static-replica" }
+                ]
+            }
+        ],
+        "default_cache_behavior": {
+            "target_origin_id": "s3-static",
+            "viewer_protocol_policy": "redirect-to-https",
+            "allowed_methods": ["GET", "HEAD", "OPTIONS"],
+            "cached_methods": ["GET", "HEAD"],
+            "compress": true,
+            "cache_policy_id": "658327ea-f89d-4fab-a63d-7e88639e58f6",
+            "origin_request_policy_id": "88a5eaf4-2fd4-4709-b370-b4c650ea3fcf",
+            "response_headers_policy_id": { "ref": "security-headers-policy.id" },
+            "function_associations": [
+                {
+                    "event_type": "viewer-request",
+                    "function_arn": { "ref": "url-rewrite-function.arn" }
+                }
+            ]
+        },
+        "ordered_cache_behaviors": [
+            {
+                "path_pattern": "/api/*",
+                "target_origin_id": "api-backend",
+                "viewer_protocol_policy": "https-only",
+                "allowed_methods": ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"],
+                "cached_methods": ["GET", "HEAD"],
+                "compress": true,
+                "cache_policy_id": "4135ea2d-6df8-44a3-9df3-4b5a84be39ad",
+                "origin_request_policy_id": "216adef6-5c7f-47e4-b989-5492eafa07d3"
+            },
+            {
+                "path_pattern": "/static/*",
+                "target_origin_id": "s3-static",
+                "viewer_protocol_policy": "redirect-to-https",
+                "allowed_methods": ["GET", "HEAD"],
+                "cached_methods": ["GET", "HEAD"],
+                "compress": true,
+                "min_ttl": 86400,
+                "default_ttl": 604800,
+                "max_ttl": 31536000
+            }
+        ],
+        "viewer_certificate": {
+            "acm_certificate_arn": { "ref": "cloudfront-acm-cert.arn" },
+            "ssl_support_method": "sni-only",
+            "minimum_protocol_version": "TLSv1.2_2021"
+        },
+        "custom_error_responses": [
+            {
+                "error_code": 404,
+                "response_code": 200,
+                "response_page_path": "/index.html",
+                "error_caching_min_ttl": 10
+            },
+            {
+                "error_code": 403,
+                "response_code": 200,
+                "response_page_path": "/index.html",
+                "error_caching_min_ttl": 10
+            }
+        ],
+        "geo_restriction": {
+            "restriction_type": "none"
+        },
+        "logging_config": {
+            "bucket": { "ref": "logs-bucket.bucket_domain_name" },
+            "prefix": "cloudfront/",
+            "include_cookies": false
+        },
+        "tags": {
+            "Environment": "production",
+            "Project": "sigmoid"
+        }
+    },
+    "inputSpecs": [
+        { "name": "aliases", "type": "array", "required": false },
+        { "name": "comment", "type": "string", "required": false },
+        { "name": "default_root_object", "type": "string", "required": false },
+        { "name": "enabled", "type": "boolean", "required": false, "default": true },
+        { "name": "http_version", "type": "string", "required": false, "default": "http2and3" },
+        { "name": "is_ipv6_enabled", "type": "boolean", "required": false, "default": true },
+        { "name": "price_class", "type": "string", "required": false, "default": "PriceClass_All" },
+        { "name": "retain_on_delete", "type": "boolean", "required": false, "default": false },
+        { "name": "wait_for_deployment", "type": "boolean", "required": false, "default": true },
+        { "name": "web_acl_id", "type": "string", "required": false },
+        { "name": "origins", "type": "array", "required": true },
+        { "name": "origin_groups", "type": "array", "required": false },
+        { "name": "default_cache_behavior", "type": "object", "required": true },
+        { "name": "ordered_cache_behaviors", "type": "array", "required": false },
+        { "name": "viewer_certificate", "type": "object", "required": false },
+        { "name": "custom_error_responses", "type": "array", "required": false },
+        { "name": "geo_restriction", "type": "object", "required": false },
+        { "name": "logging_config", "type": "object", "required": false },
+        { "name": "tags", "type": "object", "required": false }
+    ],
+    "position": { "x": 50, "y": 50 },
+    "terraform": {
+        "module": {
+            "source": "../../terraform-modules/terraform-aws-cloudfront"
+        }
+    }
+}
