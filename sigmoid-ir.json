@@ -146,7 +146,8 @@
     "position": { "x": 50, "y": 50 },
     "terraform": {
         "module": {
-            "source": "../../terraform-modules/terraform-aws-cloudfront"
+            "source": "github.com/sigmoid-hq/terraform-aws-cloudfront",
+            "ref": "main"
         }
     }
 }
