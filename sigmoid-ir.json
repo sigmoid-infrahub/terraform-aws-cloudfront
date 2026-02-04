@@ -2,6 +2,8 @@
     "resourceSpecId": "77777777-7777-4777-8777-777777777777",
     "stableId": "main-cloudfront",
     "displayName": "Main CloudFront Distribution",
+    "category": "network",
+    "iconUrl": "https://cdn.sigmoid.us/icons/aws/full-size/svg/networking/cloudfront.svg",
     "resourceType": "cdn.cloudfront",
     "vpcDependency": "none",
     "status": "draft",
