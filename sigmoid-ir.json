@@ -13,5 +13,17 @@
             "source": "github.com/sigmoid-hq/terraform-aws-cloudfront",
             "ref": "main"
         }
+    },
+    "pricing": {
+        "awsPricingLookup": {
+            "serviceCode": "AmazonCloudFront",
+            "unit": "per_gb_month",
+            "quantityProperties": ["monthly_data_transfer_gb"],
+            "quantityDefault": 0,
+            "filters": [
+                { "field": "location", "value": "Global" },
+                { "field": "productFamily", "defaultValue": "Data Transfer", "required": false }
+            ]
+        }
     }
 }
