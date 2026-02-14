@@ -24,6 +24,21 @@
                 { "field": "location", "value": "Global" },
                 { "field": "productFamily", "defaultValue": "Data Transfer", "required": false }
             ]
+        },
+        "usageProfiles": {
+            "default": "medium",
+            "low": {
+                "monthly_data_transfer_gb": 100
+            },
+            "medium": {
+                "monthly_data_transfer_gb": 2000
+            },
+            "high": {
+                "monthly_data_transfer_gb": 20000
+            },
+            "xhigh": {
+                "monthly_data_transfer_gb": 200000
+            }
         }
     }
 }
