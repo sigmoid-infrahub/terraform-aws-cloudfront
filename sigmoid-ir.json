@@ -40,5 +40,11 @@
                 "monthly_data_transfer_gb": 200000
             }
         }
+    },
+    "easy": {
+        "alias": "CDN",
+        "group": "network-cdn",
+        "priority": 10,
+        "allowedProperties": ["enabled", "price_class", "default_root_object"]
     }
 }
