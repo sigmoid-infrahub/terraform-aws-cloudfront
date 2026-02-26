@@ -1,3 +1,51 @@
+resource "aws_cloudfront_origin_access_control" "this" {
+  count = var.create_origin_access_control ? 1 : 0
+
+  name                              = coalesce(var.origin_access_control_name, "cloudfront-oac")
+  description                       = "Managed by terraform-aws-cloudfront module"
+  origin_access_control_origin_type = var.origin_access_control_origin_type
+  signing_behavior                  = var.origin_access_control_signing_behavior
+  signing_protocol                  = var.origin_access_control_signing_protocol
+}
+
+resource "aws_acm_certificate" "cloudfront" {
+  count = var.domain_name != null && var.create_acm_certificate ? 1 : 0
+
+  provider                  = aws.us_east_1
+  domain_name               = var.domain_name
+  subject_alternative_names = var.subject_alternative_names
+  validation_method         = "DNS"
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "aws_route53_record" "cloudfront_cert_validation" {
+  for_each = var.domain_name != null && var.create_acm_certificate ? {
+    for dvo in aws_acm_certificate.cloudfront[0].domain_validation_options : dvo.domain_name => {
+      name   = dvo.resource_record_name
+      record = dvo.resource_record_value
+      type   = dvo.resource_record_type
+    }
+  } : {}
+
+  allow_overwrite = true
+  name            = each.value.name
+  records         = [each.value.record]
+  ttl             = 60
+  type            = each.value.type
+  zone_id         = var.hosted_zone_id
+}
+
+resource "aws_acm_certificate_validation" "cloudfront" {
+  count = var.domain_name != null && var.create_acm_certificate ? 1 : 0
+
+  provider                = aws.us_east_1
+  certificate_arn         = aws_acm_certificate.cloudfront[0].arn
+  validation_record_fqdns = [for record in aws_route53_record.cloudfront_cert_validation : record.fqdn]
+}
+
 resource "aws_cloudfront_distribution" "this" {
   enabled             = var.enabled
   is_ipv6_enabled     = var.is_ipv6_enabled
@@ -9,7 +57,7 @@ resource "aws_cloudfront_distribution" "this" {
   retain_on_delete    = var.retain_on_delete
   wait_for_deployment = var.wait_for_deployment
 
-  aliases = var.aliases
+  aliases = var.domain_name != null ? concat([var.domain_name], var.subject_alternative_names) : var.aliases
 
   dynamic "origin" {
     for_each = var.origins
@@ -17,7 +65,7 @@ resource "aws_cloudfront_distribution" "this" {
       domain_name              = origin.value.domain_name
       origin_id                = origin.value.origin_id
       origin_path              = lookup(origin.value, "origin_path", null)
-      origin_access_control_id = lookup(origin.value, "origin_access_control_id", null)
+      origin_access_control_id = coalesce(lookup(origin.value, "origin_access_control_id", null), local.origin_access_control_id)
 
       dynamic "custom_header" {
         for_each = lookup(origin.value, "custom_headers", [])
@@ -95,13 +143,11 @@ resource "aws_cloudfront_distribution" "this" {
     }
   }
 
-  dynamic "viewer_certificate" {
-    for_each = var.viewer_certificate == null ? [] : [var.viewer_certificate]
-    content {
-      acm_certificate_arn      = viewer_certificate.value.acm_certificate_arn
-      ssl_support_method       = viewer_certificate.value.ssl_support_method
-      minimum_protocol_version = viewer_certificate.value.minimum_protocol_version
-    }
+  viewer_certificate {
+    acm_certificate_arn            = local.acm_certificate_arn
+    ssl_support_method             = var.domain_name != null ? "sni-only" : null
+    minimum_protocol_version       = var.domain_name != null ? "TLSv1.2_2021" : null
+    cloudfront_default_certificate = var.domain_name == null
   }
 
   dynamic "custom_error_response" {
@@ -134,4 +180,3 @@ resource "aws_cloudfront_distribution" "this" {
 
   tags = local.resolved_tags
 }
-

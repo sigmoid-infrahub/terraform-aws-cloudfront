@@ -58,6 +58,72 @@ variable "web_acl_id" {
   default     = null
 }
 
+variable "origin_access_control_id" {
+  type        = string
+  description = "External origin access control ID"
+  default     = null
+}
+
+variable "create_origin_access_control" {
+  type        = bool
+  description = "Create origin access control"
+  default     = false
+}
+
+variable "origin_access_control_name" {
+  type        = string
+  description = "Origin access control name"
+  default     = null
+}
+
+variable "origin_access_control_origin_type" {
+  type        = string
+  description = "Origin access control origin type"
+  default     = "s3"
+}
+
+variable "origin_access_control_signing_behavior" {
+  type        = string
+  description = "Origin access control signing behavior"
+  default     = "always"
+}
+
+variable "origin_access_control_signing_protocol" {
+  type        = string
+  description = "Origin access control signing protocol"
+  default     = "sigv4"
+}
+
+variable "domain_name" {
+  type        = string
+  description = "Primary custom domain for CloudFront"
+  default     = null
+}
+
+variable "subject_alternative_names" {
+  type        = list(string)
+  description = "Additional domain names for ACM certificate"
+  default     = []
+}
+
+variable "create_acm_certificate" {
+  type        = bool
+  description = "Create ACM certificate for CloudFront"
+  default     = true
+}
+
+variable "acm_certificate_arn" {
+  type        = string
+  description = "External ACM certificate ARN for CloudFront"
+  default     = null
+}
+
+variable "hosted_zone_id" {
+  type        = string
+  description = "Route53 hosted zone ID for certificate validation"
+  default     = null
+}
+
 variable "origins" {
   type        = any
   description = "Origins configuration"
