@@ -165,6 +165,7 @@ resource "aws_cloudfront_distribution" "this" {
     content {
       geo_restriction {
         restriction_type = restrictions.value.restriction_type
+        locations        = lookup(restrictions.value, "locations", [])
       }
     }
   }
