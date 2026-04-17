@@ -1,0 +1,50 @@
+{
+    "resourceSpecId": "77777777-7777-4777-8777-777777777777",
+    "stableId": "main-cloudfront",
+    "displayName": "CloudFront CDN",
+    "category": "network",
+    "iconUrl": "https://cdn.sigmoid.us/icons/aws/full-size/svg/networking/cloudfront.svg",
+    "resourceType": "cdn.cloudfront",
+    "vpcDependency": "none",
+    "status": "draft",
+    "position": { "x": 50, "y": 50 },
+    "terraform": {
+        "module": {
+            "source": "github.com/sigmoid-hq/terraform-aws-cloudfront",
+            "ref": "main"
+        }
+    },
+    "pricing": {
+        "awsPricingLookup": {
+            "serviceCode": "AmazonCloudFront",
+            "unit": "per_gb_month",
+            "quantityProperties": ["monthly_data_transfer_gb"],
+            "quantityDefault": 0,
+            "filters": [
+                { "field": "location", "value": "Global" },
+                { "field": "productFamily", "defaultValue": "Data Transfer", "required": false }
+            ]
+        },
+        "usageProfiles": {
+            "default": "medium",
+            "low": {
+                "monthly_data_transfer_gb": 100
+            },
+            "medium": {
+                "monthly_data_transfer_gb": 2000
+            },
+            "high": {
+                "monthly_data_transfer_gb": 20000
+            },
+            "xhigh": {
+                "monthly_data_transfer_gb": 200000
+            }
+        }
+    },
+    "easy": {
+        "alias": "CDN",
+        "group": "network-cdn",
+        "priority": 10,
+        "allowedProperties": ["enabled", "price_class", "default_root_object"]
+    }
+}
