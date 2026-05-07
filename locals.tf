@@ -4,6 +4,13 @@ locals {
     var.domain_name == null ? (var.viewer_certificate != null ? var.viewer_certificate.acm_certificate_arn : null) :
     var.create_acm_certificate ? aws_acm_certificate_validation.cloudfront[0].certificate_arn : var.acm_certificate_arn
   )
+  has_logging_bucket = length(trimspace(var.logging_bucket)) > 0
+  logging_config_effective = var.enable_logging ? {
+    bucket          = var.logging_bucket
+    prefix          = "cloudfront/"
+    include_cookies = false
+  } : var.logging_config
+
   sigmoid_tags = merge(
     var.sigmoid_environment != "" ? { "sigmoid:environment" = var.sigmoid_environment } : {},
     var.sigmoid_project != "" ? { "sigmoid:project" = var.sigmoid_project } : {},

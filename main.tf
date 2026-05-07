@@ -52,7 +52,7 @@ resource "aws_cloudfront_distribution" "this" {
   comment             = var.comment
   default_root_object = var.default_root_object
   price_class         = var.price_class
-  web_acl_id          = var.web_acl_id
+  web_acl_id          = var.web_acl_id != "" ? var.web_acl_id : null
   http_version        = var.http_version
   retain_on_delete    = var.retain_on_delete
   wait_for_deployment = var.wait_for_deployment
@@ -109,7 +109,7 @@ resource "aws_cloudfront_distribution" "this" {
 
   default_cache_behavior {
     target_origin_id           = var.default_cache_behavior.target_origin_id
-    viewer_protocol_policy     = var.default_cache_behavior.viewer_protocol_policy
+    viewer_protocol_policy     = var.viewer_protocol_policy
     allowed_methods            = var.default_cache_behavior.allowed_methods
     cached_methods             = var.default_cache_behavior.cached_methods
     compress                   = var.default_cache_behavior.compress
@@ -146,7 +146,7 @@ resource "aws_cloudfront_distribution" "this" {
   viewer_certificate {
     acm_certificate_arn            = local.acm_certificate_arn
     ssl_support_method             = var.domain_name != null ? "sni-only" : null
-    minimum_protocol_version       = var.domain_name != null ? "TLSv1.2_2021" : null
+    minimum_protocol_version       = var.domain_name != null ? var.minimum_protocol_version : null
     cloudfront_default_certificate = var.domain_name == null
   }
 
@@ -171,7 +171,7 @@ resource "aws_cloudfront_distribution" "this" {
   }
 
   dynamic "logging_config" {
-    for_each = var.logging_config == null ? [] : [var.logging_config]
+    for_each = local.logging_config_effective == null || !local.has_logging_bucket && var.enable_logging ? [] : [local.logging_config_effective]
     content {
       bucket          = logging_config.value.bucket
       prefix          = lookup(logging_config.value, "prefix", null)

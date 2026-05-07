@@ -13,7 +13,7 @@ variable "comment" {
 variable "default_root_object" {
   type        = string
   description = "Default root object"
-  default     = null
+  default     = "index.html"
 }
 
 variable "enabled" {
@@ -26,6 +26,11 @@ variable "http_version" {
   type        = string
   description = "HTTP version"
   default     = "http2and3"
+
+  validation {
+    condition     = contains(["http1.1", "http2", "http2and3", "http3"], var.http_version)
+    error_message = "http_version must be one of: http1.1, http2, http2and3, http3."
+  }
 }
 
 variable "is_ipv6_enabled" {
@@ -55,7 +60,47 @@ variable "wait_for_deployment" {
 variable "web_acl_id" {
   type        = string
   description = "WAF web ACL ID"
-  default     = null
+  default     = ""
+}
+
+variable "minimum_protocol_version" {
+  type        = string
+  description = "Minimum TLS protocol version for custom viewer certificates"
+  default     = "TLSv1.2_2021"
+
+  validation {
+    condition     = contains(["TLSv1.2_2021", "TLSv1.2_2025"], var.minimum_protocol_version)
+    error_message = "minimum_protocol_version must be TLSv1.2_2021 or higher."
+  }
+}
+
+variable "viewer_protocol_policy" {
+  type        = string
+  description = "Viewer protocol policy enforced on the default cache behavior"
+  default     = "redirect-to-https"
+
+  validation {
+    condition     = contains(["redirect-to-https", "https-only"], var.viewer_protocol_policy)
+    error_message = "viewer_protocol_policy must be one of: redirect-to-https, https-only. allow-all is not permitted."
+  }
+}
+
+variable "enable_logging" {
+  type        = bool
+  description = "Enable CloudFront access logging"
+  default     = false
+}
+
+variable "log_kms_key_id" {
+  type        = string
+  description = "KMS key ID reserved for CloudFront log bucket encryption integrations"
+  default     = ""
+}
+
+variable "logging_bucket" {
+  type        = string
+  description = "S3 bucket domain name for CloudFront access logs"
+  default     = ""
 }
 
 variable "origin_access_control_id" {
