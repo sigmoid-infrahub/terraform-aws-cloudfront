@@ -113,7 +113,7 @@ resource "aws_cloudfront_distribution" "this" {
     allowed_methods            = var.default_cache_behavior.allowed_methods
     cached_methods             = var.default_cache_behavior.cached_methods
     compress                   = lookup(var.default_cache_behavior, "compress", null)
-    cache_policy_id            = lookup(var.default_cache_behavior, "cache_policy_id", null)
+    cache_policy_id            = coalesce(lookup(var.default_cache_behavior, "cache_policy_id", null), local.managed_caching_optimized_policy_id)
     origin_request_policy_id   = lookup(var.default_cache_behavior, "origin_request_policy_id", null)
     response_headers_policy_id = lookup(var.default_cache_behavior, "response_headers_policy_id", null)
 
@@ -135,7 +135,7 @@ resource "aws_cloudfront_distribution" "this" {
       allowed_methods          = ordered_cache_behavior.value.allowed_methods
       cached_methods           = ordered_cache_behavior.value.cached_methods
       compress                 = ordered_cache_behavior.value.compress
-      cache_policy_id          = lookup(ordered_cache_behavior.value, "cache_policy_id", null)
+      cache_policy_id          = coalesce(lookup(ordered_cache_behavior.value, "cache_policy_id", null), local.managed_caching_optimized_policy_id)
       origin_request_policy_id = lookup(ordered_cache_behavior.value, "origin_request_policy_id", null)
       min_ttl                  = lookup(ordered_cache_behavior.value, "min_ttl", null)
       default_ttl              = lookup(ordered_cache_behavior.value, "default_ttl", null)

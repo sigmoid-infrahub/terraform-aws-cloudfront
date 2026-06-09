@@ -1,4 +1,10 @@
 locals {
+  # AWS-managed "CachingOptimized" cache policy id (global, identical across all accounts).
+  # Default when no cache_policy_id is provided: a cache behavior must have either a
+  # cache_policy_id or a legacy forwarded_values block, else AWS rejects CreateDistribution
+  # with "ForwardedValues is required".
+  managed_caching_optimized_policy_id = "658327ea-f89d-4fab-a63d-7e88639e58f6"
+
   origin_access_control_id = var.create_origin_access_control ? aws_cloudfront_origin_access_control.this[0].id : var.origin_access_control_id
   acm_certificate_arn = (
     var.domain_name == null ? (var.viewer_certificate != null ? lookup(var.viewer_certificate, "acm_certificate_arn", null) : null) :
