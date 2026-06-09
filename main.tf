@@ -112,9 +112,9 @@ resource "aws_cloudfront_distribution" "this" {
     viewer_protocol_policy     = var.viewer_protocol_policy
     allowed_methods            = var.default_cache_behavior.allowed_methods
     cached_methods             = var.default_cache_behavior.cached_methods
-    compress                   = var.default_cache_behavior.compress
-    cache_policy_id            = var.default_cache_behavior.cache_policy_id
-    origin_request_policy_id   = var.default_cache_behavior.origin_request_policy_id
+    compress                   = lookup(var.default_cache_behavior, "compress", null)
+    cache_policy_id            = lookup(var.default_cache_behavior, "cache_policy_id", null)
+    origin_request_policy_id   = lookup(var.default_cache_behavior, "origin_request_policy_id", null)
     response_headers_policy_id = lookup(var.default_cache_behavior, "response_headers_policy_id", null)
 
     dynamic "function_association" {
