@@ -171,7 +171,7 @@ resource "aws_cloudfront_distribution" "this" {
   }
 
   dynamic "logging_config" {
-    for_each = local.logging_config_effective == null || !local.has_logging_bucket && var.enable_logging ? [] : [local.logging_config_effective]
+    for_each = local.logging_config_effective == null || try(trimspace(lookup(local.logging_config_effective, "bucket", "")), "") == "" ? [] : [local.logging_config_effective]
     content {
       bucket          = logging_config.value.bucket
       prefix          = lookup(logging_config.value, "prefix", null)
