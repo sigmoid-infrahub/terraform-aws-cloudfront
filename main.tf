@@ -3,9 +3,9 @@ resource "aws_cloudfront_origin_access_control" "this" {
 
   name                              = coalesce(var.origin_access_control_name, "cloudfront-oac")
   description                       = "Managed by terraform-aws-cloudfront module"
-  origin_access_control_origin_type = var.origin_access_control_origin_type
-  signing_behavior                  = var.origin_access_control_signing_behavior
-  signing_protocol                  = var.origin_access_control_signing_protocol
+  origin_access_control_origin_type = coalesce(var.origin_access_control_origin_type, "s3")
+  signing_behavior                  = coalesce(var.origin_access_control_signing_behavior, "always")
+  signing_protocol                  = coalesce(var.origin_access_control_signing_protocol, "sigv4")
 }
 
 resource "aws_acm_certificate" "cloudfront" {
