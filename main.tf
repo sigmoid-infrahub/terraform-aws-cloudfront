@@ -65,7 +65,7 @@ resource "aws_cloudfront_distribution" "this" {
       domain_name              = origin.value.domain_name
       origin_id                = origin.value.origin_id
       origin_path              = lookup(origin.value, "origin_path", null)
-      origin_access_control_id = coalesce(lookup(origin.value, "origin_access_control_id", null), local.origin_access_control_id)
+      origin_access_control_id = lookup(origin.value, "custom_origin_config", null) != null ? lookup(origin.value, "origin_access_control_id", null) : coalesce(lookup(origin.value, "origin_access_control_id", null), local.origin_access_control_id)
 
       dynamic "custom_header" {
         for_each = lookup(origin.value, "custom_headers", [])
