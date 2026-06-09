@@ -1,7 +1,7 @@
 locals {
   origin_access_control_id = var.create_origin_access_control ? aws_cloudfront_origin_access_control.this[0].id : var.origin_access_control_id
   acm_certificate_arn = (
-    var.domain_name == null ? (var.viewer_certificate != null ? var.viewer_certificate.acm_certificate_arn : null) :
+    var.domain_name == null ? (var.viewer_certificate != null ? lookup(var.viewer_certificate, "acm_certificate_arn", null) : null) :
     var.create_acm_certificate ? aws_acm_certificate_validation.cloudfront[0].certificate_arn : var.acm_certificate_arn
   )
   has_logging_bucket = length(trimspace(var.logging_bucket)) > 0
