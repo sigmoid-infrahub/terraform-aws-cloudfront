@@ -172,6 +172,11 @@ variable "hosted_zone_id" {
 variable "origins" {
   type        = any
   description = "Origins configuration"
+
+  validation {
+    condition     = alltrue([for o in var.origins : try(o.origin_id, "") != "" && try(o.domain_name, "") != ""])
+    error_message = "Every origin must have a non-empty origin_id and domain_name. An empty value usually means a connected origin (S3/ALB) was not resolved."
+  }
 }
 
 variable "origin_groups" {
